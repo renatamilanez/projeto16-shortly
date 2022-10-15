@@ -1,10 +1,9 @@
 import {connection} from "../database/db.js";
-import { stripHtml } from "string-strip-html";
+import {stripHtml} from "string-strip-html";
 import {urlSchema} from "../middlewares/schemas.js";
 import {nanoid} from "nanoid";
 import moment from "moment";
 
-//PRONTA, TUDO OK (COLOCAR REGEX NA URL)
 async function postUrls(req, res){
     const token = req.headers.authorization?.replace("Bearer ", "");
     let {url} = req.body;
@@ -51,7 +50,6 @@ async function postUrls(req, res){
     }
 };
 
-//PRONTO, TUDO OK
 async function getUrls(req, res){
     const {id} = req.params;
 
@@ -81,7 +79,6 @@ async function getUrls(req, res){
     }
 };
 
-//PRONTO, TUDO OK
 async function openShortUrl(req, res){
     const {shortUrl} = req.params;
 
@@ -118,7 +115,6 @@ async function openShortUrl(req, res){
     }
 };
 
-//PRONTA, TUDO OK
 async function deleteUrl(req, res){
     const {id} = req.params;
     const token = req.headers.authorization?.replace("Bearer ", "");
