@@ -4,7 +4,7 @@ import {userSchema} from "../middlewares/schemas.js";
 import bcrypt from 'bcrypt';
 import moment from "moment";
 
-//PRONTO, FALTA TESTAR
+//PRONTO, TUDO OK
 async function signUp(req, res){
     let {name, email, password, confirmPassword} = req.body;
     name = stripHtml(name).result.trim();

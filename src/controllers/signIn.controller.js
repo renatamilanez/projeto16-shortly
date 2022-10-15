@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import {v4 as uuidv4} from "uuid";
 import moment from "moment";
 
-//PRONTA, FALTA TESTAR
+//PRONTA, TUDO OK
 async function signIn(req, res){
     let {email, password} = req.body;
     email = stripHtml(email).result.trim();
@@ -31,10 +31,11 @@ async function signIn(req, res){
             return res.sendStatus(401);
         };
 
-        const userPassword = await connection.query(
+        let userPassword = await connection.query(
             'SELECT password FROM users WHERE email = $1',
             [email]
         );
+        userPassword = userPassword.rows[0].password;
 
         const isValid = bcrypt.compareSync(password, userPassword);
 
@@ -44,10 +45,11 @@ async function signIn(req, res){
 
         const token = uuidv4();
 
-        const userId = await connection.query(
+        let userId = await connection.query(
             'SELECT id FROM users WHERE email = $1',
             [email]
         );
+        userId = userId.rows[0].id;
 
         await connection.query(
             'INSERT INTO sessions ("userId", token, "createdAt") VALUES ($1, $2, $3)',
