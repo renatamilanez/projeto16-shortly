@@ -36,6 +36,21 @@ async function getUserData(req, res){
         );
         userData = userData.rows[0];
 
+        if(userData === undefined){
+            userData = (await connection.query(
+                `SELECT id,
+                name
+                FROM users
+                WHERE id = $1;
+                `,
+                [userId]
+            )).rows[0];
+            userData = {
+                ...userData,
+                visitCount: 0
+            }
+        }
+
         let userLinks = await connection.query(
             `SELECT 
             links.id AS id,
