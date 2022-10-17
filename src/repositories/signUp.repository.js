@@ -18,4 +18,4 @@ async function postUser(name, email, hashPassword){
     );
 }
 
-export {hasUser, postUser}
+export {hasUser, postUser};

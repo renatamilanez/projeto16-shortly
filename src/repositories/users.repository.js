@@ -10,7 +10,7 @@ async function getUserDate(userId){
         WHERE users.id=$1
         GROUP BY users.id;`,
         [userId]
-    )
+    );
 }
 
 async function getUserLinks(userId){
@@ -38,4 +38,4 @@ async function setUserData(userId){
     );
 }
 
-export {getUserDate, getUserLinks, setUserData}
+export {getUserDate, getUserLinks, setUserData};

@@ -1,4 +1,3 @@
-import {connection} from "../database/db.js";
 import { STATUS_CODE } from '../enums/statusCode.js';
 import * as usersRepository from "../repositories/users.repository.js";
 

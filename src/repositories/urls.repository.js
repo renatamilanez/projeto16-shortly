@@ -43,7 +43,7 @@ async function updateVisits(increaseVisits, shortUrl){
     return connection.query(
         `UPDATE links SET "visitCount" = ${increaseVisits} WHERE "shortUrl" = $1;`,
         [shortUrl]
-    )
+    );
 }
 
 async function getShortUrl(id){
@@ -57,7 +57,7 @@ async function getUserFromUrl(id){
     return connection.query(
         'SELECT "userId" FROM links WHERE id = $1;',
         [id]
-    )
+    );
 }
 
 async function deleteUrl(id){

@@ -22,7 +22,7 @@ async function signIn(req, res){
 
         if(userExist.rows.length === 0){
             return res.sendStatus(STATUS_CODE.ERRORUNAUTHORIZED);
-        };
+        }
 
         const userPassword = await signInRepository.hasPassword(email);
 
@@ -30,7 +30,7 @@ async function signIn(req, res){
 
         if(!isValid){
             return res.sendStatus(STATUS_CODE.ERRORUNAUTHORIZED);
-        };
+        }
 
         const token = uuidv4();
 

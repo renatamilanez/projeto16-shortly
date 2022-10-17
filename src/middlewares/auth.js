@@ -6,7 +6,7 @@ async function authMiddleware(req, res, next) {
 
     if(!token){
         return res.sendStatus(STATUS_CODE.ERRORUNAUTHORIZED);
-    };
+    }
 
     try {
         const hasSession = await connection.query(
@@ -16,7 +16,7 @@ async function authMiddleware(req, res, next) {
 
         if(hasSession.rows.length === 0){
             return res.sendStatus(STATUS_CODE.ERRORUNAUTHORIZED);
-        };
+        }
 
         const userId = (await connection.query(
             'SELECT "userId" FROM sessions WHERE token = $1 ;',

@@ -12,4 +12,4 @@ async function getRanking(req, res){
     }
 }
 
-export {getRanking}
+export {getRanking};

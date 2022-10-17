@@ -15,7 +15,7 @@ async function postUrls(req, res){
         if(validation.error){
             const errors = validation.error.details.map(detail => detail.message);
             return res.status(STATUS_CODE.ERRORUNPROCESSABLEENTITY).send(errors);
-        };
+        }
 
         const shortUrl = nanoid(10);
 
@@ -26,7 +26,7 @@ async function postUrls(req, res){
        console.error(error);
        return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL); 
     }
-};
+}
 
 async function getUrls(req, res){
     const {id} = req.params;
@@ -49,7 +49,7 @@ async function getUrls(req, res){
         console.error(error);
         return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL);
     }
-};
+}
 
 async function openShortUrl(req, res){
     const {shortUrl} = req.params;
@@ -59,7 +59,7 @@ async function openShortUrl(req, res){
 
         if(hasUrl.rows.length === 0){
             return res.sendStatus(STATUS_CODE.ERRORNOTFOUND);
-        };
+        }
 
         const url = hasUrl.rows[0].url;
 
@@ -74,7 +74,7 @@ async function openShortUrl(req, res){
         console.error(error);
         return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL);
     }
-};
+}
 
 async function deleteUrl(req, res){
     const {id} = req.params;
@@ -100,6 +100,6 @@ async function deleteUrl(req, res){
         console.error(error);
         return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL);
     }
-};
+}
 
 export {postUrls, getUrls, openShortUrl, deleteUrl};
