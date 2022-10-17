@@ -4,6 +4,7 @@ import {loginSchema} from "../middlewares/schemas.js";
 import bcrypt from 'bcrypt';
 import {v4 as uuidv4} from "uuid";
 import moment from "moment";
+import { STATUS_CODE } from '../enums/statusCode.js';
 
 //PRONTA, TUDO OK
 async function signIn(req, res){
@@ -19,7 +20,7 @@ async function signIn(req, res){
 
         if(validation.error){
             const errors = validation.error.details.map(detail => detail.message);
-            return res.status(422).send(errors);
+            return res.status(STATUS_CODE.ERRORUNPROCESSABLEENTITY).send(errors);
         }
 
         const userExist = await connection.query(
@@ -28,7 +29,7 @@ async function signIn(req, res){
         );
 
         if(userExist.rows.length === 0){
-            return res.sendStatus(401);
+            return res.sendStatus(STATUS_CODE.ERRORUNAUTHORIZED);
         };
 
         let userPassword = await connection.query(
@@ -40,7 +41,7 @@ async function signIn(req, res){
         const isValid = bcrypt.compareSync(password, userPassword);
 
         if(!isValid){
-            return res.sendStatus(401);
+            return res.sendStatus(STATUS_CODE.ERRORUNAUTHORIZED);
         };
 
         const token = uuidv4();
@@ -56,10 +57,10 @@ async function signIn(req, res){
             [userId, token, createdAt]
         );
         
-        return res.status(200).send({token});
+        return res.status(STATUS_CODE.SUCCESSOK).send({token});
     } catch (error) {
         console.error(error);
-        return res.sendStatus(500);
+        return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL);
     }
 }
 

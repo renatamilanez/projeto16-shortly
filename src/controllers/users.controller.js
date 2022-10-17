@@ -1,30 +1,15 @@
 import {connection} from "../database/db.js";
+import { STATUS_CODE } from '../enums/statusCode.js';
 
 async function getUserData(req, res){
-    const token = req.headers.authorization?.replace("Bearer ", "");
+    const userId = res.locals.userId;
 
     try {
-         const userValid = await connection.query(
-            'SELECT token FROM sessions WHERE token = $1;',
-            [token]
-        );
-
-        if(!token || userValid.rows.length === 0){
-            return res.sendStatus(401);
-        };
-
-        let userId = await connection.query(
-            'SELECT "userId" FROM sessions WHERE token = $1;',
-            [token]
-        );
-
-        userId = userId.rows[0].userId;
-
         if(!userId){
-            return res.sendStatus(404);
+            return res.sendStatus(STATUS_CODE.ERRORNOTFOUND);
         }
 
-        let userData = await connection.query(
+        const userData = (await connection.query(
             `SELECT users.id AS id, 
             users.name AS name,
             SUM(links."visitCount") AS "visitCount"
@@ -33,8 +18,7 @@ async function getUserData(req, res){
             WHERE users.id=$1
             GROUP BY users.id;`,
             [userId]
-        );
-        userData = userData.rows[0];
+        )).rows[0];
 
         if(userData === undefined){
             userData = (await connection.query(
@@ -70,10 +54,10 @@ async function getUserData(req, res){
             shortenedUrls: userLinks
         };
         
-        return res.status(200).send(data);
+        return res.status(STATUS_CODE.SUCCESSOK).send(data);
     } catch (error) {
         console.error(error);
-        return res.sendStatus(500);
+        return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL);
     }
 }
 

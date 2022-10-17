@@ -3,9 +3,11 @@ import {stripHtml} from "string-strip-html";
 import {urlSchema} from "../middlewares/schemas.js";
 import {nanoid} from "nanoid";
 import moment from "moment";
+import { STATUS_CODE } from '../enums/statusCode.js';
 
 async function postUrls(req, res){
-    const token = req.headers.authorization?.replace("Bearer ", "");
+    const token = res.locals.token;
+    const userId = res.locals.userId;
     let {url} = req.body;
     url = stripHtml(url).result.trim();
 
@@ -13,28 +15,12 @@ async function postUrls(req, res){
     const createdAt = now.format();
 
     try {
-        const userValid = await connection.query(
-            'SELECT token FROM sessions WHERE token = $1;',
-            [token]
-        );
-
-        if(!token || userValid.rows.length === 0){
-            return res.sendStatus(401);
-        };
-
         const validation = urlSchema.validate({url}, {abortEarly: false});
 
         if(validation.error){
             const errors = validation.error.details.map(detail => detail.message);
-            return res.status(422).send(errors);
+            return res.status(STATUS_CODE.ERRORUNPROCESSABLEENTITY).send(errors);
         };
-
-        let userId = await connection.query(
-            'SELECT "userId" FROM sessions WHERE token = $1;',
-            [token]
-        );
-
-        userId = userId.rows[0].userId;
 
         const shortUrl = nanoid(10);
 
@@ -43,10 +29,10 @@ async function postUrls(req, res){
             [userId, url, shortUrl, createdAt]
         );
 
-        return res.status(201).send({shortUrl});
+        return res.status(STATUS_CODE.SUCCESSCREATED).send({shortUrl});
     } catch (error) {
        console.error(error);
-       return res.sendStatus(500); 
+       return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL); 
     }
 };
 
@@ -54,28 +40,28 @@ async function getUrls(req, res){
     const {id} = req.params;
 
     try {
-        const hasUrl = await connection.query(
+        const hasUrl = (await connection.query(
             'SELECT url FROM links WHERE id = $1;',
             [id]
-        );
+        )).rows;
 
-        if(hasUrl.rows.length === 0){
-            return res.sendStatus(404);
+        if(hasUrl.length === 0){
+            return res.sendStatus(STATUS_CODE.ERRORNOTFOUND);
         }
 
-        const data = await connection.query(
+        const data = (await connection.query(
             'SELECT "shortUrl", url FROM links WHERE id = $1;',
             [id]
-        );
+        )).rows[0];
 
-        return res.status(200).send({
+        return res.status(STATUS_CODE.SUCCESSOK).send({
             id,
-            shortUrl: data.rows[0].shortUrl,
-            url: data.rows[0].url
+            shortUrl: data.shortUrl,
+            url: data.url
         });
     } catch (error) {
         console.error(error);
-        return res.sendStatus(500);
+        return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL);
     }
 };
 
@@ -89,17 +75,15 @@ async function openShortUrl(req, res){
         );
 
         if(hasUrl.rows.length === 0){
-            return res.sendStatus(404);
+            return res.sendStatus(STATUS_CODE.ERRORNOTFOUND);
         };
 
         const url = hasUrl.rows[0].url;
 
-        let visits = await connection.query(
+        const visits = (await connection.query(
             'SELECT "visitCount" FROM links WHERE "shortUrl" = $1;',
             [shortUrl]
-        );
-
-        visits = visits.rows[0].visitCount;
+        )).rows[0].visitCount;
 
         const increaseVisits = Number(visits) + 1;
 
@@ -111,45 +95,31 @@ async function openShortUrl(req, res){
         return res.redirect(url);
     } catch (error) {
         console.error(error);
-        return res.sendStatus(500);
+        return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL);
     }
 };
 
 async function deleteUrl(req, res){
     const {id} = req.params;
-    const token = req.headers.authorization?.replace("Bearer ", "");
+    const userId = res.locals.userId;
 
     try {
-        const userValid = await connection.query(
-            'SELECT token FROM sessions WHERE token = $1;',
-            [token]
-        );
-
-        if(!token || userValid.rows.length === 0){
-            return res.sendStatus(401);
-        };
-
-        const hasUrl = await connection.query(
+        const hasUrl = (await connection.query(
             'SELECT "shortUrl" FROM links WHERE id = $1;',
             [id]
-        );
+        )).rows;
 
-        if(hasUrl.rows.length === 0){
-            return res.sendStatus(404);
+        if(hasUrl.length === 0){
+            return res.sendStatus(STATUS_CODE.ERRORNOTFOUND);
         }
 
-        const userFromToken = await connection.query(
-            'SELECT "userId" FROM sessions WHERE token = $1 ;',
-            [token]
-        );
-
-        const userFromUrl = await connection.query(
+        const userFromUrl = (await connection.query(
             'SELECT "userId" FROM links WHERE id = $1;',
             [id]
-        );
+        )).rows[0].userId;
 
-        if(userFromToken.rows[0].userId !== userFromUrl.rows[0].userId){
-            return res.sendStatus(401);
+        if(userId !== userFromUrl){
+            return res.sendStatus(STATUS_CODE.ERRORUNAUTHORIZED);
         };
 
         await connection.query(
@@ -157,10 +127,10 @@ async function deleteUrl(req, res){
             [id]
         );
 
-        return res.sendStatus(204);
+        return res.sendStatus(STATUS_CODE.SUCCESSNOCONTENT);
     } catch (error) {
         console.error(error);
-        return res.sendStatus(500);
+        return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL);
     }
 };
 

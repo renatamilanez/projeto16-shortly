@@ -1,4 +1,5 @@
 import {connection} from "../database/db.js";
+import { STATUS_CODE } from '../enums/statusCode.js';
 
 async function getRanking(req, res){
     try {
@@ -14,10 +15,10 @@ async function getRanking(req, res){
             LIMIT 10;`
         );
         
-        return res.status(200).send(ranking.rows);
+        return res.status(STATUS_CODE.SUCCESSOK).send(ranking.rows);
     } catch (error) {
         console.error(error);
-        return res.sendStatus(500);
+        return res.sendStatus(STATUS_CODE.SERVERERRORINTERNAL);
     }
 }
 
