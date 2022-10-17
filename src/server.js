@@ -17,5 +17,5 @@ dotenv.config({path: "../.env"});
 server.use(signInRouter, signUpRouter, urlsRouters, rankingRouter, getUserData, getRanking);
 
 server.listen(process.env.PORT, () => {
-    console.log('Listening on Port 4000');
+    console.log(`Server running on port ${process.env.PORT}`);
 });
